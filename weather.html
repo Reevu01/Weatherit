@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App - Dark Mode</title>
+    <script
+      src="https://kit.fontawesome.com/a076d05399.js"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap");
+
+      body {
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        transition: background 0.3s ease, color 0.3s ease;
+      }
+
+      body.dark-mode {
+        background: linear-gradient(135deg, #121212, #282c34);
+        color: #ffffff;
+      }
+
+      body.light-mode {
+        background: linear-gradient(135deg, #f0f0f0, #ffffff);
+        color: #000000;
+      }
+
+      .weather-app {
+        background: #1e1e2f;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.7);
+        text-align: center;
+        max-width: 350px;
+        border: 1px solid #333;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out,
+          background-color 0.3s ease;
+      }
+
+      body.light-mode .weather-app {
+        background: #ffffff;
+        border-color: #ccc;
+        box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 28px;
+        color: #03a9f4;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+
+      .location {
+        font-size: 22px;
+        margin: 10px 0;
+        font-weight: 500;
+      }
+
+      .temperature {
+        font-size: 64px;
+        margin: 20px 0;
+        font-weight: 700;
+      }
+
+      .description {
+        font-size: 18px;
+        margin-bottom: 30px;
+      }
+
+      input[type="text"] {
+        padding: 14px;
+        width: calc(100% - 28px);
+        margin-bottom: 15px;
+        border: 2px solid #3949ab;
+        border-radius: 10px;
+        background-color: #1e2235;
+        color: #ffffff;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+      }
+
+      body.light-mode input[type="text"] {
+        background-color: #f0f0f0;
+        color: #000000;
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        border-color: #6200ea;
+      }
+
+      button {
+        padding: 14px;
+        background: #03a9f4;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        cursor: pointer;
+        width: 100%;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        font-weight: 500;
+      }
+
+      button:hover {
+        background: #6200ea;
+        transform: scale(1.05);
+      }
+
+      button:focus {
+        outline: none;
+      }
+
+      button:active {
+        background: #3700b3;
+        transform: scale(0.98);
+      }
+
+      form {
+        margin-top: 20px;
+      }
+
+      .toggle-theme {
+        margin-top: 20px;
+        background: #ff4081;
+        color: #ffffff;
+      }
+
+      body.light-mode .toggle-theme {
+        background: #03a9f4;
+        color: #ffffff;
+      }
+
+      .day-night-icon {
+        font-size: 32px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="weather-app">
+      <h1>Weather App</h1>
+      <div class="location" id="locationDisplay">{{city}}, {{country}}</div>
+      <div class="temperature" id="tempDisplay">{{ temp }}°C</div>
+      <div class="description" id="dayNightDisplay">{{ day }}</div>
+      <i id="dayNightIcon" class="fas day-night-icon"></i>
+      <form id="weatherForm" action="/" method="post">
+        <input
+          type="text"
+          id="country"
+          name="country"
+          placeholder="Enter country"
+        />
+        <input type="text" id="state" name="state" placeholder="Enter state" />
+        <input type="text" id="city" name="city" placeholder="Enter city" />
+        <button type="submit" id="getWeather">Get Weather</button>
+      </form>
+      <button id="toggleTheme" class="toggle-theme">
+        Switch to Light Mode
+      </button>
+    </div>
+
+    <script>
+      const toggleButton = document.getElementById("toggleTheme");
+      const body = document.body;
+      const dayNightDisplay = document.getElementById("dayNightDisplay");
+      const dayNightIcon = document.getElementById("dayNightIcon");
+
+      // Function to set theme based on localStorage
+      function setTheme(theme) {
+        if (theme === "light-mode") {
+          body.classList.add("light-mode");
+          body.classList.remove("dark-mode");
+          toggleButton.textContent = "Switch to Dark Mode";
+        } else {
+          body.classList.add("dark-mode");
+          body.classList.remove("light-mode");
+          toggleButton.textContent = "Switch to Light Mode";
+        }
+      }
+
+      // Check localStorage for theme and apply it on load
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) {
+        setTheme(savedTheme);
+      } else {
+        setTheme("dark-mode"); // Default to dark mode
+      }
+
+      toggleButton.addEventListener("click", function () {
+        if (body.classList.contains("light-mode")) {
+          localStorage.setItem("theme", "dark-mode");
+          setTheme("dark-mode");
+        } else {
+          localStorage.setItem("theme", "light-mode");
+          setTheme("light-mode");
+        }
+      });
+
+      // Function to update the sun/moon icon based on Day/Night
+      function updateDayNightIcon() {
+        if (dayNightDisplay.textContent.trim() === "Day") {
+          dayNightIcon.classList.add("fa-sun");
+          dayNightIcon.classList.remove("fa-moon");
+        } else {
+          dayNightIcon.classList.add("fa-moon");
+          dayNightIcon.classList.remove("fa-sun");
+        }
+      }
+
+      // Initially set the day/night icon
+      updateDayNightIcon();
+
+      // Optionally, if you're updating day/night dynamically, you can call updateDayNightIcon after the weather updates
+      // For example: updateDayNightIcon(); after fetching new weather data
+    </script>
+  </body>
+</html>
